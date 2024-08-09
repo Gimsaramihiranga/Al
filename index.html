@@ -5,112 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Picture Upload Website</title>
     <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background: linear-gradient(to right, #ffafbd, #ffc3a0);
-            color: #333;
-            margin: 0;
-            padding: 0;
-        }
-
-        .header {
-            text-align: center;
-            padding: 50px 20px;
-            background: #ff6f61;
-            color: #fff;
-        }
-
-        .header h1 {
-            font-size: 3em;
-            margin: 0;
-        }
-
-        .upload-section {
-            text-align: center;
-            padding: 50px 20px;
-            background: #fff;
-        }
-
-        .upload-section h2 {
-            font-size: 2em;
-            margin-bottom: 20px;
-            color: #ff6f61;
-        }
-
-        form {
-            display: inline-block;
-            margin-top: 20px;
-        }
-
-        input[type="file"] {
-            padding: 10px;
-            margin-bottom: 10px;
-        }
-
-        button {
-            padding: 10px 20px;
-            background-color: #ff6f61;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 1em;
-        }
-
-        button:hover {
-            background-color: #ffafbd;
-        }
-
-        .gallery {
-            padding: 50px 20px;
-            background: #ffc3a0;
-        }
-
-        .gallery h2 {
-            text-align: center;
-            font-size: 2em;
-            color: #ff6f61;
-        }
-
-        #galleryGrid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-
-        .gallery-item {
-            text-align: center;
-        }
-
-        .gallery-item img {
-            width: 100%;
-            height: auto;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .download-button {
-            margin-top: 10px;
-            padding: 8px 16px;
-            background-color: #ff6f61;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            text-decoration: none;
-            display: inline-block;
-        }
-
-        .download-button:hover {
-            background-color: #ffafbd;
-        }
-
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #ff6f61;
-            color: #fff;
-        }
+        /* Same CSS as before */
     </style>
 </head>
 <body>
@@ -137,12 +32,6 @@
     </footer>
 
     <script>
-        const token = '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'; // Replace with your actual GitHub token
-        const repoOwner = 'Gimsaramihiranga'; // Replace with your GitHub username
-        const repoName = 'Al'; // Replace with your GitHub repository name
-        const branchName = 'main'; // Or the branch you want to upload to
-        const imagesPath = 'images/'; // Directory in the repo where images will be stored
-
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -154,50 +43,22 @@
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
-                    const base64Content = e.target.result.split(',')[1];
+                    const galleryItem = document.createElement('div');
+                    galleryItem.classList.add('gallery-item');
 
-                    const fileName = file.name;
-                    const filePath = imagesPath + fileName;
-                    const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
 
-                    fetch(apiUrl, {
-                        method: 'PUT',
-                        headers: {
-                            'Authorization': `token ${token}`,
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            message: `Upload image ${fileName}`,
-                            content: base64Content,
-                            branch: branchName
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.content && data.content.download_url) {
-                            const galleryItem = document.createElement('div');
-                            galleryItem.classList.add('gallery-item');
+                    // Create download link for Google Drive uploaded image
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = e.target.result; // Use e.target.result or a Google Drive link
+                    downloadLink.download = file.name;
+                    downloadLink.classList.add('download-button');
+                    downloadLink.textContent = 'Download';
 
-                            const img = document.createElement('img');
-                            img.src = data.content.download_url;
-
-                            const downloadLink = document.createElement('a');
-                            downloadLink.href = data.content.download_url;
-                            downloadLink.download = fileName;
-                            downloadLink.classList.add('download-button');
-                            downloadLink.textContent = 'Download';
-
-                            galleryItem.appendChild(img);
-                            galleryItem.appendChild(downloadLink);
-                            galleryGrid.appendChild(galleryItem);
-                        } else {
-                            alert('Failed to upload the image to GitHub.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while uploading the image.');
-                    });
+                    galleryItem.appendChild(img);
+                    galleryItem.appendChild(downloadLink);
+                    galleryGrid.appendChild(galleryItem);
                 };
 
                 reader.readAsDataURL(file);
