@@ -137,6 +137,12 @@
     </footer>
 
     <script>
+        const token = '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'; // Replace with your actual GitHub token
+        const repoOwner = 'https://github.com/Gimsaramihiranga'; // Replace with your GitHub username
+        const repoName = 'https://github.com/Gimsaramihiranga/Al'; // Replace with your GitHub repository name
+        const branchName = 'main'; // Or the branch you want to upload to
+        const imagesPath = 'images/'; // Directory in the repo where images will be stored
+
         document.getElementById('uploadForm').addEventListener('submit', function(event) {
             event.preventDefault();
             
@@ -144,27 +150,57 @@
             const galleryGrid = document.getElementById('galleryGrid');
 
             if (fileInput.files && fileInput.files[0]) {
+                const file = fileInput.files[0];
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
-                    const galleryItem = document.createElement('div');
-                    galleryItem.classList.add('gallery-item');
+                    const base64Content = e.target.result.split(',')[1];
 
-                    const img = document.createElement('img');
-                    img.src = e.target.result;
+                    const fileName = file.name;
+                    const filePath = imagesPath + fileName;
+                    const apiUrl = `https://api.github.com/repos/${repoOwner}/${repoName}/contents/${filePath}`;
 
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = e.target.result;
-                    downloadLink.download = fileInput.files[0].name;
-                    downloadLink.classList.add('download-button');
-                    downloadLink.textContent = 'Download';
+                    fetch(apiUrl, {
+                        method: 'PUT',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            message: `Upload image ${fileName}`,
+                            content: base64Content,
+                            branch: branchName
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.content && data.content.download_url) {
+                            const galleryItem = document.createElement('div');
+                            galleryItem.classList.add('gallery-item');
 
-                    galleryItem.appendChild(img);
-                    galleryItem.appendChild(downloadLink);
-                    galleryGrid.appendChild(galleryItem);
+                            const img = document.createElement('img');
+                            img.src = data.content.download_url;
+
+                            const downloadLink = document.createElement('a');
+                            downloadLink.href = data.content.download_url;
+                            downloadLink.download = fileName;
+                            downloadLink.classList.add('download-button');
+                            downloadLink.textContent = 'Download';
+
+                            galleryItem.appendChild(img);
+                            galleryItem.appendChild(downloadLink);
+                            galleryGrid.appendChild(galleryItem);
+                        } else {
+                            alert('Failed to upload the image to GitHub.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while uploading the image.');
+                    });
                 };
 
-                reader.readAsDataURL(fileInput.files[0]);
+                reader.readAsDataURL(file);
             }
         });
     </script>
