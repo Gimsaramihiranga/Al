@@ -78,11 +78,31 @@
             padding: 20px;
         }
 
-        #galleryGrid img {
+        .gallery-item {
+            text-align: center;
+        }
+
+        .gallery-item img {
             width: 100%;
             height: auto;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .download-button {
+            margin-top: 10px;
+            padding: 8px 16px;
+            background-color: #ff6f61;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .download-button:hover {
+            background-color: #ffafbd;
         }
 
         .footer {
@@ -127,9 +147,21 @@
                 const reader = new FileReader();
 
                 reader.onload = function(e) {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.classList.add('gallery-item');
+
                     const img = document.createElement('img');
                     img.src = e.target.result;
-                    galleryGrid.appendChild(img);
+
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = e.target.result;
+                    downloadLink.download = fileInput.files[0].name;
+                    downloadLink.classList.add('download-button');
+                    downloadLink.textContent = 'Download';
+
+                    galleryItem.appendChild(img);
+                    galleryItem.appendChild(downloadLink);
+                    galleryGrid.appendChild(galleryItem);
                 };
 
                 reader.readAsDataURL(fileInput.files[0]);
